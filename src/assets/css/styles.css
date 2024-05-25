@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: linear-gradient(to bottom, #00a884 18%, #dbdcda 18%);
+}
+
+#chat {
+  background-image: url('../img/chat.png');
+  background-color: #eeeae3;
+}
