@@ -1,70 +1,81 @@
 <template>
-  <div id="app" class="w-screen h-screen p-6">
-    <div class="flex gap-6 h-full">
-      <!-- Perfil Usuario 1 -->
-      <div class="user">
-        <div class="flex flex-col items-center">
-          <img src="./assets/img/user.png" class="user__avatar" />
-          <h2 class="user__name">nombre usuario</h2>
-        </div>
-        <div class="flex flex-col w-full">
-          <label htmlFor="messageColor" class="text-start">Color mensaje</label>
-          <select id="messageColor" class="h-10">
-            <option>colores</option>
-          </select>
-        </div>
-        <div class="flex flex-col w-full">
-          <label htmlFor="messageText" class="text-start">Mensaje</label>
-          <textarea id="messageText" class="w-full p-4" rows="6">blabla</textarea>
-        </div>
-        <button class="btn btn--primary">enviar</button>
-      </div>
+  <div id="app" class="w-screen h-screen p-6 flex gap-6">
 
-      <div id="chat" class="rounded-md w-1/2 p-6 flex flex-col">
-        un array de nombre, mensaje y color. si es usuario 1 es text-left, si es usuario 2 es text-right
-        <!-- Mensaje del usuario 1 -->
-        <div class="message__box--user1 bg-white">
-          <h4 class="message__user">Nombre Usuario 1</h4>
-          <p class="message__text--user1">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Adipisci atque sapiente iusto in, obcaecati est quam tempora reiciendis sequi explicabo corporis dolores incidunt eius alias officia? Laborum suscipit quas voluptatum?</p>
-        </div>
-
-        <!-- Mensaje del usuario 2 -->
-        <div class="message__box--user2 bg-whatsapp-500">
-          <h4 class="message__user">Nombre Usuario 2</h4>
-          <p class="message__text--user2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi accusamus, labore in magni voluptates esse? Voluptatem quaerat nobis fugit nesciunt. Possimus deserunt laborum quas facere sint eius cupiditate, temporibus adipisci.</p>
-        </div>
+    <!-- Perfil Usuario 0 -->
+    <div class="user" v-if="users.length > 0 && users[0]">
+      <div class="flex flex-col items-center">
+        <img :src="users[0].picture.large" class="user__avatar" />
+        <h2 class="user__name">{{ users[0].name.first }} {{ users[0].name.last }}</h2>
       </div>
-
-      <!-- Perfil Usuario 2 -->
-      <div class="user">
-        <div class="flex flex-col items-center">
-          <img src="./assets/img/user.png" class="user__avatar" />
-          <h2 class="user__name">nombre usuario</h2>
-        </div>
-        <div class="flex flex-col w-full">
-          <label htmlFor="messageColor" class="text-start">Color mensaje</label>
-          <select id="messageColor" class="h-10">
-            <option>colores</option>
-          </select>
-        </div>
-        <div class="flex flex-col w-full">
-          <label htmlFor="messageText" class="text-start">Mensaje</label>
-          <textarea id="messageText" class="w-full p-4" rows="6">blabla</textarea>
-        </div>
-        <button class="btn btn--primary">enviar</button>
+      <div class="user__color" :class="userColors[0]"></div>
+      <div class="flex flex-col w-full">
+        <label for="messageText0" class="text-start">Mensaje</label>
+        <textarea id="messageText0" rows="6" v-model="userMessage0"></textarea>
       </div>
+      <button class="btn btn--primary" @click="sendMessage(0)">enviar</button>
     </div>
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+
+    <!-- Chat -->
+    <ChatMessages :messages="messages" />
+
+    <!-- Perfil Usuario 1 -->
+    <div class="user" v-if="users.length > 1 && users[1]">
+      <div class="flex flex-col items-center">
+        <img :src="users[1].picture.large" class="user__avatar" />
+        <h2 class="user__name">{{ users[1].name.first }} {{ users[1].name.last }}</h2>
+      </div>
+      <div class="user__color" :class="userColors[1]"></div>
+      <div class="flex flex-col w-full">
+        <label for="messageText1" class="text-start">Mensaje</label>
+        <textarea id="messageText1" rows="6" v-model="userMessage1"></textarea>
+      </div>
+      <button class="btn btn--primary" @click="sendMessage(1)">enviar</button>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import ChatMessages from './components/ChatMessages.vue';
+import axios from 'axios';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    ChatMessages
+  },
+  data() {
+    return {
+      users: [],
+      userColors: ['bg-whatsapp-500', 'bg-white'],
+      userMessage0: '',
+      userMessage1: '',
+      messages: [],
+    };
+  },
+  mounted() {
+    this.fetchUsers();
+  },
+  methods: {
+    async fetchUsers() {
+      try {
+        const url = "https://randomuser.me/api?results=2";
+        const { data } = await axios.get(url)
+        this.users = data.results
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    sendMessage(userIndex) {
+      const user = this.users[userIndex];
+      const messageContent = this[`userMessage${userIndex}`];
+      const messageData = {
+        name: `${user.name.first} ${user.name.last}`,
+        message: messageContent,
+        style: userIndex === 0 ? `text-left ${this.userColors[0]}` : `text-right ml-auto ${this.userColors[1]}`
+      };
+      this.messages.push(messageData);
+      this[`userMessage${userIndex}`] = '';
+    }
   }
 }
 </script>
